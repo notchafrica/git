@@ -33,6 +33,14 @@ class Git
     }
 
     /**
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
      * @return bool|string
      */
     public function reset()
@@ -40,14 +48,6 @@ class Git
         $cmd = "cd {$this->path} && git fetch --all && git reset --hard origin/master";
 
         return system($cmd);
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath()
-    {
-        return $this->path;
     }
 
     /**
@@ -108,6 +108,62 @@ class Git
         if (Stringy::create($result)->contains('Deleted')) {
             exec("cd {$this->path} && git push origin :refs/tags/$tag");
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNothingToCommit()
+    {
+        $res = exec("cd {$this->path} && git status");
+
+        return Stringy::create($res)->contains('nothing to commit');
+    }
+
+    /**
+     * @param string $files
+     *
+     * @return string
+     */
+    public function addFiles($files = '.')
+    {
+        return exec("cd {$this->path} && git add $files");
+    }
+
+    /**
+     * @param string $shell
+     *
+     * @return string
+     */
+    public function shell($shell)
+    {
+        return exec("cd {$this->path} && $shell");
+    }
+
+    /**
+     * @param string $message
+     *
+     * @return string
+     */
+    public function commitMessage($message)
+    {
+        return exec("cd {$this->path} && git commit -m '$message'");
+    }
+
+    /**
+     * @return string
+     */
+    public function push()
+    {
+        return exec("cd {$this->path} && git push");
+    }
+
+    /**
+     * @return string
+     */
+    public function pushUOriginMaster()
+    {
+        return exec("cd {$this->path} && git push -u origin master");
     }
 
     /**
