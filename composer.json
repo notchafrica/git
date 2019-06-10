@@ -1,0 +1,43 @@
+{
+    "name": "songshenzong/git",
+    "description": "A Git Client for PHP",
+    "keywords": [
+        "git",
+        "client"
+    ],
+    "license": "MIT",
+    "homepage": "http://songshenzong.com",
+    "support": {
+        "issues": "https://github.com/songshenzong/git/issues",
+        "source": "https://github.com/songshenzong/git"
+    },
+    "authors": [
+        {
+            "name": "Songshenzong",
+            "email": "i@songshenzong.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "danielstjules/stringy": "^3.1",
+        "guzzlehttp/guzzle": "^6.3",
+        "httpx/tea": "dev-master",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~7.0",
+        "symfony/dotenv": "^4.3",
+        "symfony/var-dumper": "^4.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Songshenzong\\Git\\": "src",
+            "Songshenzong\\Git\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "fixer": "php-cs-fixer fix ./"
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
