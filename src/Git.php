@@ -172,7 +172,7 @@ class Git
      *
      * @return Git
      */
-    public function cloneAndInstance($clone_url, $target_dir)
+    public static function cloneAndInstance($clone_url, $target_dir)
     {
         exec("rm -rf $target_dir && git clone $clone_url $target_dir 1>/dev/null 2>/dev/null", $output);
 
