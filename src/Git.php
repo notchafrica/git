@@ -178,4 +178,17 @@ class Git
 
         return new self($target_dir);
     }
+
+    /**
+     * @param string $source
+     * @param string $dir
+     *
+     * @return string
+     */
+    public function updateFiles($source, $dir = '')
+    {
+        $target_dir = "{$this->path}{$dir}";
+
+        return exec("rm -rf {$target_dir}/* && cp -R -f $source/* {$target_dir}/");
+    }
 }
