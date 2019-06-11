@@ -153,9 +153,17 @@ class Git
      *
      * @return array
      */
-    public function commitMessage($message)
+    public function commit($message)
     {
         return $this->exec("git commit -m '$message'");
+    }
+
+    /**
+     * @return array
+     */
+    public function amend()
+    {
+        return $this->exec('git commit --amend');
     }
 
     /**
