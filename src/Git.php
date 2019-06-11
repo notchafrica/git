@@ -4,6 +4,7 @@ namespace Songshenzong\Git;
 
 use Stringy\Stringy;
 use InvalidArgumentException;
+use Songshenzong\Command\Command;
 
 /**
  * Class Git
