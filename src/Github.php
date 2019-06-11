@@ -116,6 +116,6 @@ class Github
     {
         list($algo, $hash) = explode('=', $signature, 2);
 
-        return $hash !== hash_hmac($algo, $body, $secret);
+        return $hash === hash_hmac($algo, $body, $secret);
     }
 }
