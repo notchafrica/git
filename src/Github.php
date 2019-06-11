@@ -3,6 +3,7 @@
 namespace Songshenzong\Git;
 
 use HttpX\Tea\Tea;
+use App\AliException;
 use GuzzleHttp\Client;
 use HttpX\Tea\Response;
 use GuzzleHttp\Psr7\Request;
@@ -103,5 +104,19 @@ class Github
         }
 
         return self::$organizationRepositories[$orgs][$page];
+    }
+
+    /**
+     * @param string $signature
+     * @param string $secret
+     * @param string $body
+     *
+     * @return bool
+     */
+    public static function checkSignature($signature, $secret, $body)
+    {
+        list($algo, $hash) = explode('=', $signature[0], 2);
+
+        return $hash !== hash_hmac($algo, $body, $secret);
     }
 }
