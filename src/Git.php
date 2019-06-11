@@ -41,13 +41,32 @@ class Git
     }
 
     /**
-     * @return bool|string
+     * @param string $shell
+     *
+     * @return array
+     */
+    public function exec($shell)
+    {
+        return Command::exec($shell, $this->path);
+    }
+
+    /**
+     * @return array
      */
     public function reset()
     {
-        $cmd = "cd {$this->path} && git fetch --all && git reset --hard origin/master";
+        return $this->exec('git fetch --all && git reset --hard origin/master');
+    }
 
-        return system($cmd);
+    /**
+     * @return array
+     */
+    public function getTags()
+    {
+        $tags = $this->exec('git tag');
+        usort($tags, 'version_compare');
+
+        return $tags;
     }
 
     /**
@@ -58,19 +77,6 @@ class Git
         $tags = $this->getTags();
 
         return array_pop($tags);
-    }
-
-    /**
-     * @return array
-     */
-    public function getTags()
-    {
-        $cmd  = "cd {$this->path} && git tag";
-        $tags = shell_exec($cmd);
-        $tags = explode("\n", $tags);
-        usort($tags, 'version_compare');
-
-        return $tags;
     }
 
     /**
@@ -86,28 +92,27 @@ class Git
     /**
      * @param string $tag
      *
-     * @return bool
+     * @return array
      */
     public function addTag($tag)
     {
-        if ($this->hasTag($tag)) {
-            return false;
-        }
-
-        exec("cd {$this->path} && git tag $tag && git push origin --tags");
-
-        return true;
+        return $this->exec("git tag $tag && git push origin --tags");
     }
 
     /**
      * @param string $tag
+     *
+     * @return array
      */
     public function deleteTag($tag)
     {
-        $result = exec("cd {$this->path} && git tag -d $tag");
+        $result = $this->exec("git tag -d $tag");
+        $result = implode("\n", $result);
         if (Stringy::create($result)->contains('Deleted')) {
-            exec("cd {$this->path} && git push origin :refs/tags/$tag");
+            return $this->exec("git push origin :refs/tags/$tag");
         }
+
+        return $result;
     }
 
     /**
@@ -115,55 +120,70 @@ class Git
      */
     public function isNothingToCommit()
     {
-        $res = exec("cd {$this->path} && git status");
+        return $this->resultContains('git status', 'nothing to commit');
+    }
 
-        return Stringy::create($res)->contains('nothing to commit');
+    /**
+     * @param $shell
+     * @param $string
+     *
+     * @return bool
+     */
+    public function resultContains($shell, $string)
+    {
+        $output = $this->exec($shell);
+        $result = implode("\n", $output);
+
+        return Stringy::create($result)->contains($string);
     }
 
     /**
      * @param string $files
      *
-     * @return string
+     * @return array
      */
     public function addFiles($files = '.')
     {
-        return exec("cd {$this->path} && git add $files");
-    }
-
-    /**
-     * @param string $shell
-     *
-     * @return string
-     */
-    public function shell($shell)
-    {
-        return exec("cd {$this->path} && $shell");
+        return $this->exec("git add $files");
     }
 
     /**
      * @param string $message
      *
-     * @return string
+     * @return array
      */
     public function commitMessage($message)
     {
-        return exec("cd {$this->path} && git commit -m '$message'");
+        return $this->exec("git commit -m '$message'");
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function push()
     {
-        return exec("cd {$this->path} && git push");
+        return $this->exec('git push');
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function pushUOriginMaster()
     {
-        return exec("cd {$this->path} && git push -u origin master");
+        return $this->exec('git push -u origin master');
+    }
+
+    /**
+     * @param string $source
+     * @param string $dir
+     *
+     * @return array
+     */
+    public function updateFiles($source, $dir = '')
+    {
+        $target_dir = "{$this->path}{$dir}";
+
+        return Command::exec("rm -rf {$target_dir}/* && cp -R -f $source/* {$target_dir}/");
     }
 
     /**
@@ -174,21 +194,8 @@ class Git
      */
     public static function cloneAndInstance($clone_url, $target_dir)
     {
-        exec("rm -rf $target_dir && git clone $clone_url $target_dir 1>/dev/null 2>/dev/null", $output);
+        Command::exec("rm -rf $target_dir && git clone $clone_url $target_dir");
 
         return new self($target_dir);
-    }
-
-    /**
-     * @param string $source
-     * @param string $dir
-     *
-     * @return string
-     */
-    public function updateFiles($source, $dir = '')
-    {
-        $target_dir = "{$this->path}{$dir}";
-
-        return exec("rm -rf {$target_dir}/* && cp -R -f $source/* {$target_dir}/");
     }
 }

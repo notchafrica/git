@@ -5,6 +5,11 @@ namespace Songshenzong\Ding\Tests\Feature;
 use Songshenzong\Git\Git;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class GitTest
+ *
+ * @package Songshenzong\Ding\Tests\Feature
+ */
 class GitTest extends TestCase
 {
     /**
