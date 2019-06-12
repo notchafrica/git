@@ -62,6 +62,14 @@ class Git
     /**
      * @return array
      */
+    public function status()
+    {
+        return $this->exec('git status');
+    }
+
+    /**
+     * @return array
+     */
     public function getTags()
     {
         $tags = $this->exec('git tag');
