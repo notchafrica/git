@@ -3,6 +3,7 @@
 namespace Songshenzong\Git;
 
 use Stringy\Stringy;
+use RuntimeException;
 use InvalidArgumentException;
 use Songshenzong\Command\Output;
 use Songshenzong\Command\Command;
@@ -21,11 +22,53 @@ class Git
     protected $path = '';
 
     /**
+     * @param string $clone_url
+     * @param string $target_dir
+     *
+     * @return Git
+     */
+    public static function cloneAndOpen($clone_url, $target_dir)
+    {
+        Command::exec("rm -rf $target_dir && git clone $clone_url $target_dir");
+
+        return new self($target_dir);
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return Git
+     */
+    public static function open($path)
+    {
+        return new self($path);
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return Git
+     */
+    public static function init($path)
+    {
+        if (!file_exists($path)) {
+            Command::exec("mkdir -p $path");
+        }
+
+        $exec = Command::exec("cd $path && git init");
+        if (Stringy::create($exec)->contains('existing')) {
+            throw new RuntimeException($exec);
+        }
+
+        return new self($path);
+    }
+
+    /**
      * Git constructor.
      *
      * @param string $path
      */
-    public function __construct($path)
+    protected function __construct($path)
     {
         if (!file_exists("$path/.git")) {
             throw new InvalidArgumentException("$path is not a git repository directory.");
@@ -152,7 +195,7 @@ class Git
      *
      * @return Output
      */
-    public function addFiles($files = '.')
+    public function add($files = '.')
     {
         return $this->exec("git add $files");
     }
@@ -202,18 +245,5 @@ class Git
         $target_dir = "{$this->path}{$dir}";
 
         return Command::exec("rm -rf {$target_dir}/* && cp -R -f $source/* {$target_dir}/");
-    }
-
-    /**
-     * @param string $clone_url
-     * @param string $target_dir
-     *
-     * @return Git
-     */
-    public static function cloneAndInstance($clone_url, $target_dir)
-    {
-        Command::exec("rm -rf $target_dir && git clone $clone_url $target_dir");
-
-        return new self($target_dir);
     }
 }
