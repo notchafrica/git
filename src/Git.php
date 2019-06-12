@@ -4,6 +4,7 @@ namespace Songshenzong\Git;
 
 use Stringy\Stringy;
 use InvalidArgumentException;
+use Songshenzong\Command\Output;
 use Songshenzong\Command\Command;
 
 /**
@@ -22,7 +23,7 @@ class Git
     /**
      * Git constructor.
      *
-     * @param $path
+     * @param string $path
      */
     public function __construct($path)
     {
@@ -44,7 +45,7 @@ class Git
     /**
      * @param string $shell
      *
-     * @return array
+     * @return Output
      */
     public function exec($shell)
     {
@@ -52,7 +53,7 @@ class Git
     }
 
     /**
-     * @return array
+     * @return Output
      */
     public function reset()
     {
@@ -60,7 +61,7 @@ class Git
     }
 
     /**
-     * @return array
+     * @return Output
      */
     public function status()
     {
@@ -72,7 +73,7 @@ class Git
      */
     public function getTags()
     {
-        $tags = $this->exec('git tag');
+        $tags = $this->exec('git tag')->all();
         usort($tags, 'version_compare');
 
         return $tags;
@@ -101,7 +102,7 @@ class Git
     /**
      * @param string $tag
      *
-     * @return array
+     * @return Output
      */
     public function addTag($tag)
     {
@@ -111,12 +112,12 @@ class Git
     /**
      * @param string $tag
      *
-     * @return array
+     * @return Output
      */
     public function deleteTag($tag)
     {
         $result = $this->exec("git tag -d $tag");
-        $result = implode("\n", $result);
+        $result = implode("\n", $result->all());
         if (Stringy::create($result)->contains('Deleted')) {
             return $this->exec("git push origin :refs/tags/$tag");
         }
@@ -133,15 +134,15 @@ class Git
     }
 
     /**
-     * @param $shell
-     * @param $string
+     * @param string $shell
+     * @param string $string
      *
      * @return bool
      */
     public function resultContains($shell, $string)
     {
         $output = $this->exec($shell);
-        $result = implode("\n", $output);
+        $result = implode("\n", $output->all());
 
         return Stringy::create($result)->contains($string);
     }
@@ -149,7 +150,7 @@ class Git
     /**
      * @param string $files
      *
-     * @return array
+     * @return Output
      */
     public function addFiles($files = '.')
     {
@@ -159,7 +160,7 @@ class Git
     /**
      * @param string $message
      *
-     * @return array
+     * @return Output
      */
     public function commit($message)
     {
@@ -167,7 +168,7 @@ class Git
     }
 
     /**
-     * @return array
+     * @return Output
      */
     public function amend()
     {
@@ -175,7 +176,7 @@ class Git
     }
 
     /**
-     * @return array
+     * @return Output
      */
     public function push()
     {
@@ -183,7 +184,7 @@ class Git
     }
 
     /**
-     * @return array
+     * @return Output
      */
     public function pushUOriginMaster()
     {
@@ -194,7 +195,7 @@ class Git
      * @param string $source
      * @param string $dir
      *
-     * @return array
+     * @return Output
      */
     public function updateFiles($source, $dir = '')
     {
@@ -204,8 +205,8 @@ class Git
     }
 
     /**
-     * @param $clone_url
-     * @param $target_dir
+     * @param string $clone_url
+     * @param string $target_dir
      *
      * @return Git
      */
