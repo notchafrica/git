@@ -9,7 +9,6 @@ php:
   - nightly
 env:
   - COMPOSER_OPTS=""
-  - COMPOSER_OPTS="--prefer-lowest"
 
 matrix:
   allow_failures:
