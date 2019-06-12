@@ -6,3 +6,4 @@
 /build
 .env
 /cache
+/git.iml

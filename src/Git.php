@@ -29,7 +29,8 @@ class Git
      */
     public static function cloneAndOpen($clone_url, $target_dir)
     {
-        Command::exec("rm -rf $target_dir && git clone $clone_url $target_dir");
+        Command::exec("rm -rf $target_dir");
+        Command::exec("git clone $clone_url $target_dir");
 
         return new self($target_dir);
     }
@@ -244,6 +245,8 @@ class Git
     {
         $target_dir = "{$this->path}{$dir}";
 
-        return Command::exec("rm -rf {$target_dir}/* && cp -R -f $source/* {$target_dir}/");
+        Command::exec("rm -rf {$target_dir}/*");
+
+        return Command::exec("cp -R -f $source/* {$target_dir}/");
     }
 }
