@@ -5,6 +5,7 @@ namespace Songshenzong\Git;
 use HttpX\Tea\Tea;
 use HttpX\Tea\Response;
 use GuzzleHttp\Psr7\Request;
+use Songshenzong\Support\Arrays;
 
 /**
  * Class Github
@@ -13,7 +14,33 @@ use GuzzleHttp\Psr7\Request;
  */
 class Github
 {
+    /**
+     * @var array
+     */
     protected static $organizationRepositories;
+
+    /**
+     * @param string $token
+     * @param string $orgs
+     * @param array  $repo
+     *
+     * @return string
+     */
+    public static function createInOrganization($token, $orgs, array $repo)
+    {
+        $uri = "https://api.github.com/orgs/$orgs/repos";
+
+        return self::request(
+            'POST',
+            $uri,
+            [
+                'headers' => [
+                    'Authorization' => "token $token"
+                ],
+                'body'    => json_encode($repo)
+            ]
+        );
+    }
 
     /**
      * @param string $token
@@ -24,9 +51,11 @@ class Github
      */
     public static function delete($token, $username, $repo)
     {
+        $uri = "https://api.github.com/repos/$username/$repo";
+
         return self::request(
             'DELETE',
-            "https://api.github.com/repos/$username/$repo",
+            $uri,
             [
                 'headers' => [
                     'Authorization' => "token $token"
@@ -44,9 +73,11 @@ class Github
      */
     public static function exists($token, $username, $repo)
     {
+        $uri = "https://api.github.com/repos/$username/$repo";
+
         $response = self::request(
             'GET',
-            "https://api.github.com/repos/$username/$repo",
+            $uri,
             [
                 'headers' => [
                     'Authorization' => "token $token"
@@ -81,6 +112,27 @@ class Github
         }
 
         return self::$organizationRepositories[$orgs][$page];
+    }
+
+    /**
+     * @param string $token
+     * @param string $orgs
+     * @param string $repo
+     *
+     * @return bool
+     */
+    public static function existsInOrganization($token, $orgs, $repo)
+    {
+        $lists1 = self::listOrganizationRepositories($token, $orgs);
+        $lists2 = self::listOrganizationRepositories($token, $orgs, 2);
+        $lists  = Arrays::merge([$lists1, $lists2]);
+        foreach ($lists as $list) {
+            if (strtolower($list['name']) === strtolower($repo)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

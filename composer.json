@@ -22,7 +22,8 @@
         "ext-json": "*",
         "guzzlehttp/guzzle": "^6.3",
         "danielstjules/stringy": "^3.1",
-        "songshenzong/command": "^1.0"
+        "songshenzong/command": "^1.0",
+        "songshenzong/support": "^2.0"
     },
     "require-dev": {
         "symfony/dotenv": "^3.4",
