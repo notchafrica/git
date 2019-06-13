@@ -3,10 +3,8 @@
 namespace Songshenzong\Git;
 
 use HttpX\Tea\Tea;
-use GuzzleHttp\Client;
 use HttpX\Tea\Response;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\GuzzleException;
 
 /**
  * Class Github
@@ -26,20 +24,13 @@ class Github
      */
     public static function delete($token, $username, $repo)
     {
-        $request = new Request(
+        return self::request(
             'DELETE',
             "https://api.github.com/repos/$username/$repo",
             [
-                'Authorization' => "token $token"
-            ]
-        );
-
-        return Tea::doPsrRequest(
-            $request,
-            [
-                'connect_timeout' => 35,
-                'timeout'         => 30,
-                'http_errors'     => false,
+                'headers' => [
+                    'Authorization' => "token $token"
+                ],
             ]
         );
     }
@@ -53,20 +44,13 @@ class Github
      */
     public static function exists($token, $username, $repo)
     {
-        $request = new Request(
+        $response = self::request(
             'GET',
             "https://api.github.com/repos/$username/$repo",
             [
-                'Authorization' => "token $token"
-            ]
-        );
-
-        $response = Tea::doPsrRequest(
-            $request,
-            [
-                'connect_timeout' => 35,
-                'timeout'         => 30,
-                'http_errors'     => false,
+                'headers' => [
+                    'Authorization' => "token $token"
+                ],
             ]
         );
 
@@ -81,25 +65,19 @@ class Github
      * @param int    $page
      *
      * @return array
-     * @throws GuzzleException
      */
     public static function listOrganizationRepositories($token, $orgs, $page = 1)
     {
         if (!isset(self::$organizationRepositories[$orgs][$page])) {
-            $response = (new Client())->request(
+            self::$organizationRepositories[$orgs][$page] = self::request(
                 'GET',
                 "https://api.github.com/orgs/$orgs/repos?per_page=100&page=$page",
                 [
-                    'connect_timeout' => 35,
-                    'timeout'         => 30,
-                    'http_errors'     => false,
-                    'headers'         => [
+                    'headers' => [
                         'Authorization' => "token $token"
                     ],
                 ]
             );
-
-            self::$organizationRepositories[$orgs][$page] = json_decode($response->getBody()->getContents(), true);
         }
 
         return self::$organizationRepositories[$orgs][$page];
@@ -117,5 +95,31 @@ class Github
         list($algo, $hash) = explode('=', $signature, 2);
 
         return $hash === hash_hmac($algo, $body, $secret);
+    }
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array  $config
+     *
+     * @return Response
+     */
+    private static function request($method, $uri, $config = [])
+    {
+        if (!isset($config['connect_timeout'])) {
+            $config['connect_timeout'] = 35;
+        }
+
+        if (!isset($config['timeout'])) {
+            $config['timeout'] = 30;
+        }
+
+        if (!isset($config['http_errors'])) {
+            $config['http_errors'] = false;
+        }
+
+        $request = new Request($method, $uri);
+
+        return Tea::doPsrRequest($request, $config);
     }
 }
