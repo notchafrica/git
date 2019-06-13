@@ -1,6 +1,6 @@
 <?php
 
-namespace Songshenzong\Ding\Tests\Feature;
+namespace Songshenzong\Git\Tests\Feature;
 
 use Exception;
 use Stringy\Stringy;
@@ -11,7 +11,7 @@ use Songshenzong\Command\Command;
 /**
  * Class GitTest
  *
- * @package Songshenzong\Ding\Tests\Feature
+ * @package Songshenzong\Git\Tests\Feature
  */
 class GitTest extends TestCase
 {
